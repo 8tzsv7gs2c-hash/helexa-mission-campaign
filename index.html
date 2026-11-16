@@ -6,30 +6,134 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>HELEXA MISSION CAMPAIGN</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    *{box-sizing:border-box}
-    body{margin:0;background:#0b1422;color:#f4f7fb;font-family:Arial,sans-serif}
-    header{background:#101b2d;padding:18px 5%;border-bottom:1px solid #293b53}
-    header strong{color:#20d89a;letter-spacing:2px}
-    main{max-width:850px;margin:35px auto;padding:0 18px}
-    .card{background:#17263b;border:1px solid #293b53;border-radius:15px;padding:22px;margin:15px 0}
-    h1{font-size:27px}h2{font-size:20px}
-    input,textarea{width:100%;padding:12px;margin:7px 0 14px;background:#0e1a2b;color:white;border:1px solid #40516a;border-radius:8px}
-    button{padding:11px 16px;border:0;border-radius:8px;background:#20b987;color:#061b16;font-weight:bold;cursor:pointer;margin:4px}
-    button.secondary{background:#293d58;color:white}
-    .muted{color:#a9bbd2;font-size:14px}
-    .mission{border-top:1px solid #34445b;padding:15px 0}
-    .hidden{display:none}
-    #message{padding:12px;border-radius:8px;margin:12px 0;background:#243750}
-    footer{text-align:center;color:#8295ae;padding:30px;font-size:12px}
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #0b1422;
+      color: #f4f7fb;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      background: #101b2d;
+      padding: 18px 5%;
+      border-bottom: 1px solid #293b53;
+    }
+
+    header strong {
+      color: #20d89a;
+      letter-spacing: 2px;
+    }
+
+    main {
+      max-width: 850px;
+      margin: 35px auto;
+      padding: 0 18px;
+    }
+
+    .card {
+      background: #17263b;
+      border: 1px solid #293b53;
+      border-radius: 15px;
+      padding: 22px;
+      margin: 15px 0;
+    }
+
+    h1 { font-size: 27px; }
+    h2 { font-size: 20px; }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 7px 0 14px;
+      background: #0e1a2b;
+      color: white;
+      border: 1px solid #40516a;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 11px 16px;
+      border: 0;
+      border-radius: 8px;
+      background: #20b987;
+      color: #061b16;
+      font-weight: bold;
+      cursor: pointer;
+      margin: 4px;
+    }
+
+    button.secondary {
+      background: #293d58;
+      color: white;
+    }
+
+    button.reject {
+      background: #b83c4b;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.85;
+    }
+
+    .muted {
+      color: #a9bbd2;
+      font-size: 14px;
+    }
+
+    .mission {
+      border-top: 1px solid #34445b;
+      padding: 15px 0;
+    }
+
+    .admin-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .admin-actions button {
+      margin: 0;
+      min-width: 95px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #message {
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0;
+      background: #243750;
+    }
+
+    footer {
+      text-align: center;
+      color: #8295ae;
+      padding: 30px;
+      font-size: 12px;
+    }
   </style>
 </head>
+
 <body>
-<header><strong>HELEXA MISSION CAMPAIGN</strong></header>
+
+<header>
+  <strong>HELEXA MISSION CAMPAIGN</strong>
+</header>
+
 <main>
+
   <section id="auth" class="card">
     <h1>Selamat datang di HELEXA</h1>
     <p class="muted">Masuk ke akun atau daftar sebagai anggota baru.</p>
+
     <div id="message">Silakan masuk atau buat akun.</div>
 
     <label>Nama (untuk pendaftaran)</label>
@@ -46,6 +150,7 @@
   </section>
 
   <section id="dashboard" class="hidden">
+
     <div class="card">
       <h1>Dashboard Anggota</h1>
       <p id="welcome" class="muted"></p>
@@ -54,7 +159,10 @@
 
     <div class="card">
       <h2>Misi tersedia</h2>
-      <p class="muted">Pilih misi, selesaikan instruksi, lalu kirim bukti untuk diperiksa admin.</p>
+      <p class="muted">
+        Pilih misi, selesaikan instruksi, lalu kirim bukti
+        untuk diperiksa admin.
+      </p>
       <div id="missions">Memuat misi...</div>
     </div>
 
@@ -65,12 +173,20 @@
 
     <div id="admin" class="card hidden">
       <h2>Panel Admin</h2>
-      <p class="muted">Akun admin dapat melihat pengajuan anggota. Pencatatan reward belum diaktifkan.</p>
+      <p class="muted">
+        Periksa bukti anggota dan tentukan apakah pengajuan
+        diterima atau ditolak. Pencatatan reward belum diaktifkan.
+      </p>
       <div id="adminSubmissions"></div>
     </div>
+
   </section>
+
 </main>
-<footer>HELEXA MISSION CAMPAIGN · Sistem misi dan verifikasi</footer>
+
+<footer>
+  HELEXA MISSION CAMPAIGN · Sistem misi dan verifikasi
+</footer>
 
 <script>
 const SUPABASE_URL = "https://ezekjtkqhhvwtjbrljyg.supabase.co";
@@ -98,37 +214,52 @@ async function register() {
     password,
     options: {
       data: { display_name: name },
-      emailRedirectTo: SUPABASE_URL ? location.origin : undefined
+      emailRedirectTo: location.origin
     }
   });
 
   if (error) return message(error.message);
-  message("Pendaftaran berhasil dikirim. Periksa email untuk konfirmasi akun sebelum masuk.");
+
+  message(
+    "Pendaftaran berhasil dikirim. Periksa email untuk konfirmasi akun sebelum masuk."
+  );
 }
 
 async function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  const { error } = await db.auth.signInWithPassword({ email, password });
+  const { error } = await db.auth.signInWithPassword({
+    email,
+    password
+  });
+
   if (error) return message(error.message);
+
   await loadApp();
 }
 
 async function logout() {
   await db.auth.signOut();
+
   currentUser = null;
+
   document.getElementById("dashboard").classList.add("hidden");
   document.getElementById("auth").classList.remove("hidden");
+  document.getElementById("admin").classList.add("hidden");
 }
 
 async function loadApp() {
   const { data: { user } } = await db.auth.getUser();
+
   if (!user) return;
 
   currentUser = user;
+
   document.getElementById("auth").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("admin").classList.add("hidden");
+
   document.getElementById("welcome").textContent =
     "Login sebagai " + (user.email || "anggota");
 
@@ -148,15 +279,16 @@ async function loadApp() {
 
   if (profile.role === "admin") {
     document.getElementById("admin").classList.remove("hidden");
-    loadAdminSubmissions();
+    await loadAdminSubmissions();
   }
 
-  loadMissions();
-  loadHistory();
+  await loadMissions();
+  await loadHistory();
 }
 
 async function loadMissions() {
   const target = document.getElementById("missions");
+
   const { data, error } = await db
     .from("missions")
     .select("id,title,description,category,reward_idr")
@@ -168,12 +300,13 @@ async function loadMissions() {
     return;
   }
 
-  if (!data.length) {
+  if (!data || !data.length) {
     target.textContent = "Belum ada misi aktif.";
     return;
   }
 
   target.innerHTML = "";
+
   data.forEach(m => {
     const item = document.createElement("div");
     item.className = "mission";
@@ -186,7 +319,9 @@ async function loadMissions() {
     description.textContent = m.description || "";
 
     const reward = document.createElement("p");
-    reward.textContent = "Reward tertera: Rp" + Number(m.reward_idr).toLocaleString("id-ID");
+    reward.textContent =
+      "Reward tertera: Rp" +
+      Number(m.reward_idr).toLocaleString("id-ID");
 
     const button = document.createElement("button");
     button.textContent = "Kirim bukti";
@@ -198,7 +333,10 @@ async function loadMissions() {
 }
 
 async function submitProof(missionId, title) {
-  const proof = prompt("Masukkan link bukti atau keterangan penyelesaian misi:");
+  const proof = prompt(
+    "Masukkan link bukti atau keterangan penyelesaian misi:"
+  );
+
   if (!proof || !proof.trim()) return;
 
   const { error } = await db.from("submissions").insert({
@@ -214,11 +352,13 @@ async function submitProof(missionId, title) {
   }
 
   alert("Bukti berhasil dikirim dan menunggu pemeriksaan admin.");
-  loadHistory();
+
+  await loadHistory();
 }
 
 async function loadHistory() {
   const target = document.getElementById("history");
+
   const { data, error } = await db
     .from("submissions")
     .select("status,proof_text,created_at,missions(title)")
@@ -230,19 +370,24 @@ async function loadHistory() {
     return;
   }
 
-  if (!data.length) {
+  if (!data || !data.length) {
     target.textContent = "Belum ada pengajuan misi.";
     return;
   }
 
   target.innerHTML = "";
+
   data.forEach(s => {
     const item = document.createElement("p");
+
     item.textContent =
-      (s.missions?.title || "Misi") + " — Status: " + s.status;
+      (s.missions?.title || "Misi") +
+      " — Status: " + s.status;
+
     target.appendChild(item);
   });
-} 
+}
+
 async function loadAdminSubmissions() {
   const target = document.getElementById("adminSubmissions");
 
@@ -252,11 +397,12 @@ async function loadAdminSubmissions() {
     .order("created_at", { ascending: false });
 
   if (error) {
-    target.textContent = "Gagal memuat pengajuan: " + error.message;
+    target.textContent =
+      "Gagal memuat pengajuan: " + error.message;
     return;
   }
 
-  if (!data.length) {
+  if (!data || !data.length) {
     target.textContent = "Belum ada pengajuan anggota.";
     return;
   }
@@ -268,77 +414,100 @@ async function loadAdminSubmissions() {
     item.className = "mission";
 
     const info = document.createElement("p");
+
     info.textContent =
       (s.missions?.title || "Misi") +
       " — Status: " + s.status +
       " — Bukti: " + (s.proof_text || "");
 
     item.appendChild(info);
-const test = document.createElement("p");
-test.textContent = "TES TOMBOL BERHASIL";
-item.appendChild(test);
-    
-    const debug = document.createElement("p");
-debug.textContent = "STATUS TERBACA: [" + s.status + "]";
-item.appendChild(debug);
-    
+
     if (s.status === "pending") {
-  const approve = document.createElement("button");
-  approve.textContent = "Approve";
 
-  approve.onclick = async () => {
-    if (!confirm("Setujui pengajuan ini?")) return;
+      const actions = document.createElement("div");
+      actions.className = "admin-actions";
 
-    const { error } = await db
-      .from("submissions")
-      .update({
-        status: "approved",
-        reviewed_at: new Date().toISOString()
-      })
-      .eq("id", s.id)
-      .eq("status", "pending");
+      const approve = document.createElement("button");
+      approve.textContent = "Approve";
 
-    if (error) {
-      alert("Gagal menyetujui: " + error.message);
-      return;
+      approve.onclick = async () => {
+        if (!confirm("Setujui pengajuan ini?")) return;
+
+        approve.disabled = true;
+
+        const { data: updated, error } = await db
+          .from("submissions")
+          .update({
+            status: "approved",
+            reviewed_at: new Date().toISOString()
+          })
+          .eq("id", s.id)
+          .eq("status", "pending")
+          .select("id")
+          .maybeSingle();
+
+        if (error) {
+          alert("Gagal menyetujui: " + error.message);
+          approve.disabled = false;
+          return;
+        }
+
+        if (!updated) {
+          alert("Pengajuan sudah berubah atau tidak dapat diperbarui.");
+          await loadAdminSubmissions();
+          return;
+        }
+
+        alert("Pengajuan berhasil disetujui!");
+        await loadAdminSubmissions();
+        await loadHistory();
+      };
+
+      const reject = document.createElement("button");
+      reject.textContent = "Reject";
+      reject.className = "reject";
+
+      reject.onclick = async () => {
+        const note = prompt("Masukkan alasan penolakan:");
+
+        if (!note || !note.trim()) return;
+
+        reject.disabled = true;
+
+        const { data: updated, error } = await db
+          .from("submissions")
+          .update({
+            status: "rejected",
+            review_note: note.trim(),
+            reviewed_at: new Date().toISOString()
+          })
+          .eq("id", s.id)
+          .eq("status", "pending")
+          .select("id")
+          .maybeSingle();
+
+        if (error) {
+          alert("Gagal menolak: " + error.message);
+          reject.disabled = false;
+          return;
+        }
+
+        if (!updated) {
+          alert("Pengajuan sudah berubah atau tidak dapat diperbarui.");
+          await loadAdminSubmissions();
+          return;
+        }
+
+        alert("Pengajuan berhasil ditolak!");
+        await loadAdminSubmissions();
+        await loadHistory();
+      };
+
+      actions.append(approve, reject);
+      item.appendChild(actions);
     }
 
-    alert("Pengajuan disetujui!");
-    loadAdminSubmissions();
-  };
-
-  const reject = document.createElement("button");
-  reject.textContent = "Reject";
-  reject.className = "secondary";
-
-  reject.onclick = async () => {
-    const note = prompt("Alasan penolakan:");
-    if (!note || !note.trim()) return;
-
-    const { error } = await db
-      .from("submissions")
-      .update({
-        status: "rejected",
-        review_note: note.trim(),
-        reviewed_at: new Date().toISOString()
-      })
-      .eq("id", s.id)
-      .eq("status", "pending");
-
-    if (error) {
-      alert("Gagal menolak: " + error.message);
-      return;
-    }
-
-    alert("Pengajuan ditolak!");
-    loadAdminSubmissions();
-  };
-
-   item.appendChild(approve);
-  item.appendChild(reject);
-}
-
-target.appendChild(item);
+    target.appendChild(item);
   });
 }
 
@@ -350,5 +519,6 @@ db.auth.onAuthStateChange((event, session) => {
 
 loadApp();
 </script>
+
 </body>
 </html>
