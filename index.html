@@ -76,9 +76,8 @@
       color: white;
     }
 
-    button:hover {
-      opacity: 0.85;
-    }
+    button:hover { opacity: 0.85; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .muted {
       color: #a9bbd2;
@@ -102,15 +101,44 @@
       min-width: 100px;
     }
 
-    .hidden {
-      display: none;
-    }
+    .hidden { display: none !important; }
 
     #message {
       padding: 12px;
       border-radius: 8px;
       margin: 12px 0;
       background: #243750;
+    }
+
+    .wallet-card {
+      background: linear-gradient(135deg, #123d32, #17263b);
+      border: 1px solid #237b5d;
+      border-radius: 14px;
+      padding: 22px;
+      margin-top: 16px;
+    }
+
+    .wallet-label {
+      color: #a7d8c1;
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .wallet-balance {
+      font-size: 30px;
+      font-weight: bold;
+      margin: 12px 0;
+      color: #ffffff;
+    }
+
+    .transaction {
+      border-top: 1px solid #34445b;
+      padding: 14px 0;
+    }
+
+    .transaction-amount {
+      color: #20d89a;
+      font-weight: bold;
     }
 
     footer {
@@ -151,34 +179,79 @@
 
   <section id="dashboard" class="hidden">
 
-    <div class="card">
-      <h1>Dashboard Anggota</h1>
-      <p id="welcome" class="muted"></p>
-      <button class="secondary" onclick="logout()">Keluar</button>
+    <div id="homePage">
+
+      <div class="card">
+        <h1>Dashboard Anggota</h1>
+        <p id="welcome" class="muted"></p>
+        <button onclick="openWallet()">Wallet Saya</button>
+        <button class="secondary" onclick="logout()">Keluar</button>
+      </div>
+
+      <div class="card">
+        <h2>Wallet Saya</h2>
+
+        <div class="wallet-card">
+          <div class="wallet-label">SALDO WALLET</div>
+          <div class="wallet-balance" id="dashboardBalance">
+            Rp0
+          </div>
+          <p class="muted">Saldo reward yang tercatat</p>
+          <button onclick="openWallet()">Lihat Detail Wallet</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Misi tersedia</h2>
+        <p class="muted">
+          Pilih misi, selesaikan instruksi, lalu kirim bukti
+          untuk diperiksa admin.
+        </p>
+        <div id="missions">Memuat misi...</div>
+      </div>
+
+      <div class="card">
+        <h2>Riwayat pengajuan saya</h2>
+        <div id="history">Memuat riwayat...</div>
+      </div>
+
+      <div id="admin" class="card hidden">
+        <h2>Panel Admin</h2>
+        <p class="muted">
+          Periksa bukti anggota dan tentukan apakah pengajuan
+          diterima atau ditolak.
+        </p>
+        <div id="adminSubmissions"></div>
+      </div>
+
     </div>
 
-    <div class="card">
-      <h2>Misi tersedia</h2>
-      <p class="muted">
-        Pilih misi, selesaikan instruksi, lalu kirim bukti
-        untuk diperiksa admin.
-      </p>
-      <div id="missions">Memuat misi...</div>
-    </div>
+    <section id="walletPage" class="hidden">
 
-    <div class="card">
-      <h2>Riwayat pengajuan saya</h2>
-      <div id="history">Memuat riwayat...</div>
-    </div>
+      <div class="card">
+        <h1>Wallet Saya</h1>
+        <p class="muted">Saldo dan riwayat reward anggota.</p>
 
-    <div id="admin" class="card hidden">
-      <h2>Panel Admin</h2>
-      <p class="muted">
-        Periksa bukti anggota dan tentukan apakah pengajuan
-        diterima atau ditolak. Pencatatan reward belum diaktifkan.
-      </p>
-      <div id="adminSubmissions"></div>
-    </div>
+        <div class="wallet-card">
+          <div class="wallet-label">TOTAL SALDO</div>
+          <div class="wallet-balance" id="walletBalance">
+            Rp0
+          </div>
+          <p class="muted">Berdasarkan catatan transaksi wallet.</p>
+        </div>
+
+        <button class="secondary" onclick="closeWallet()">
+          Kembali ke Dashboard
+        </button>
+        <button onclick="loadWallet()">Muat Ulang</button>
+      </div>
+
+      <div class="card">
+        <h2>Riwayat Transaksi</h2>
+        <div id="walletHistory">Memuat transaksi...</div>
+      </div>
+
+    </section>
 
   </section>
 
@@ -191,12 +264,20 @@
 <script>
 const SUPABASE_URL = "https://ezekjtkqhhvwtjbrljyg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_UCXFOGlgRQHhaxwa8bSOFw_nCBo43a5";
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 let currentUser = null;
 
 function message(text) {
   document.getElementById("message").textContent = text;
+}
+
+function formatRupiah(amount) {
+  return "Rp" + Number(amount || 0).toLocaleString("id-ID");
 }
 
 async function register() {
@@ -221,7 +302,7 @@ async function register() {
   if (error) return message(error.message);
 
   message(
-    "Pendaftaran berhasil dikirim. Periksa email untuk konfirmasi akun sebelum masuk."
+    "Pendaftaran berhasil. Periksa email untuk konfirmasi akun sebelum masuk."
   );
 }
 
@@ -247,10 +328,14 @@ async function logout() {
   document.getElementById("dashboard").classList.add("hidden");
   document.getElementById("auth").classList.remove("hidden");
   document.getElementById("admin").classList.add("hidden");
+  document.getElementById("walletPage").classList.add("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
 }
 
 async function loadApp() {
-  const { data: { user } } = await db.auth.getUser();
+  const {
+    data: { user }
+  } = await db.auth.getUser();
 
   if (!user) return;
 
@@ -258,6 +343,8 @@ async function loadApp() {
 
   document.getElementById("auth").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
+  document.getElementById("walletPage").classList.add("hidden");
   document.getElementById("admin").classList.add("hidden");
 
   document.getElementById("welcome").textContent =
@@ -284,6 +371,7 @@ async function loadApp() {
 
   await loadMissions();
   await loadHistory();
+  await loadWallet();
 }
 
 async function loadMissions() {
@@ -320,19 +408,18 @@ async function loadMissions() {
 
     const reward = document.createElement("p");
     reward.textContent =
-      "Reward tertera: Rp" +
-      Number(m.reward_idr).toLocaleString("id-ID");
+      "Reward tertera: " + formatRupiah(m.reward_idr);
 
     const button = document.createElement("button");
     button.textContent = "Kirim bukti";
-    button.onclick = () => submitProof(m.id, m.title);
+    button.onclick = () => submitProof(m.id);
 
     item.append(title, description, reward, button);
     target.appendChild(item);
   });
 }
 
-async function submitProof(missionId, title) {
+async function submitProof(missionId) {
   const proof = prompt(
     "Masukkan link bukti atau keterangan penyelesaian misi:"
   );
@@ -388,6 +475,89 @@ async function loadHistory() {
   });
 }
 
+async function loadWallet() {
+  if (!currentUser) return;
+
+  const dashboardBalance =
+    document.getElementById("dashboardBalance");
+
+  const walletBalance =
+    document.getElementById("walletBalance");
+
+  const target =
+    document.getElementById("walletHistory");
+
+  dashboardBalance.textContent = "Memuat...";
+  walletBalance.textContent = "Memuat...";
+  target.textContent = "Memuat transaksi...";
+
+  const { data, error } = await db
+    .from("wallet_transactions")
+    .select("amount_idr,transaction_type,description,created_at")
+    .eq("member_id", currentUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    dashboardBalance.textContent = "Tidak tersedia";
+    walletBalance.textContent = "Tidak tersedia";
+    target.textContent = "Gagal memuat wallet: " + error.message;
+    return;
+  }
+
+  const balance = (data || []).reduce(
+    (total, transaction) =>
+      total + Number(transaction.amount_idr || 0),
+    0
+  );
+
+  dashboardBalance.textContent = formatRupiah(balance);
+  walletBalance.textContent = formatRupiah(balance);
+
+  if (!data || !data.length) {
+    target.textContent = "Belum ada transaksi wallet.";
+    return;
+  }
+
+  target.innerHTML = "";
+
+  data.forEach(transaction => {
+    const item = document.createElement("div");
+    item.className = "transaction";
+
+    const type = document.createElement("strong");
+    type.textContent = transaction.transaction_type || "Transaksi";
+
+    const description = document.createElement("p");
+    description.className = "muted";
+    description.textContent =
+      transaction.description || "Tidak ada deskripsi";
+
+    const amount = document.createElement("p");
+    amount.className = "transaction-amount";
+    amount.textContent = formatRupiah(transaction.amount_idr);
+
+    const date = document.createElement("p");
+    date.className = "muted";
+    date.textContent = new Date(
+      transaction.created_at
+    ).toLocaleString("id-ID");
+
+    item.append(type, description, amount, date);
+    target.appendChild(item);
+  });
+}
+
+function openWallet() {
+  document.getElementById("homePage").classList.add("hidden");
+  document.getElementById("walletPage").classList.remove("hidden");
+  loadWallet();
+}
+
+function closeWallet() {
+  document.getElementById("walletPage").classList.add("hidden");
+  document.getElementById("homePage").classList.remove("hidden");
+}
+
 async function loadAdminSubmissions() {
   const target = document.getElementById("adminSubmissions");
 
@@ -423,7 +593,6 @@ async function loadAdminSubmissions() {
     item.appendChild(info);
 
     if (s.status === "pending") {
-
       const actions = document.createElement("div");
       actions.className = "admin-actions";
 
@@ -431,34 +600,27 @@ async function loadAdminSubmissions() {
       approve.textContent = "Approve";
 
       approve.onclick = async () => {
-        if (!confirm("Setujui pengajuan ini?")) return;
+        if (!confirm(
+          "Setujui pengajuan ini dan masukkan reward ke wallet anggota?"
+        )) return;
 
         approve.disabled = true;
 
-        const { data: updated, error } = await db
-          .from("submissions")
-          .update({
-            status: "approved",
-            reviewed_at: new Date().toISOString()
-          })
-          .eq("id", s.id)
-          .eq("status", "pending")
-          .select("id")
-          .maybeSingle();
+        const { error } = await db.rpc(
+          "approve_submission_with_reward",
+          {
+            p_submission_id: s.id
+          }
+        );
 
         if (error) {
-          alert("Gagal menyetujui: " + error.message);
+          alert("Gagal menyetujui dan mencatat reward: " + error.message);
           approve.disabled = false;
           return;
         }
 
-        if (!updated) {
-          alert("Pengajuan sudah berubah atau tidak dapat diperbarui.");
-          await loadAdminSubmissions();
-          return;
-        }
+        alert("Pengajuan disetujui dan reward berhasil dicatat!");
 
-        alert("Pengajuan berhasil disetujui!");
         await loadAdminSubmissions();
         await loadHistory();
       };
@@ -479,6 +641,7 @@ async function loadAdminSubmissions() {
           .update({
             status: "rejected",
             review_note: note.trim(),
+            reviewed_by: currentUser.id,
             reviewed_at: new Date().toISOString()
           })
           .eq("id", s.id)
@@ -499,6 +662,7 @@ async function loadAdminSubmissions() {
         }
 
         alert("Pengajuan berhasil ditolak!");
+
         await loadAdminSubmissions();
         await loadHistory();
       };
