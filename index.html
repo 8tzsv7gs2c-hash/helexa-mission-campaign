@@ -334,6 +334,21 @@ item.appendChild(debug);
     loadAdminSubmissions();
   };
 
-  item.appendChild(approve);
+   item.appendChild(approve);
   item.appendChild(reject);
 }
+
+target.appendChild(item);
+  });
+}
+
+db.auth.onAuthStateChange((event, session) => {
+  if (session?.user) {
+    setTimeout(loadApp, 0);
+  }
+});
+
+loadApp();
+</script>
+</body>
+</html>
