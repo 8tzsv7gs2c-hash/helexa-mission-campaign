@@ -278,72 +278,57 @@ const test = document.createElement("p");
 test.textContent = "TES TOMBOL BERHASIL";
 item.appendChild(test);
     if (s.status === "pending") {
-      const approve = document.createElement("button");
-      approve.textContent = "Approve";
+  const approve = document.createElement("button");
+  approve.textContent = "Approve";
 
-      approve.onclick = async () => {
-        if (!confirm("Setujui pengajuan ini?")) return;
+  approve.onclick = async () => {
+    if (!confirm("Setujui pengajuan ini?")) return;
 
-        const { error } = await db
-          .from("submissions")
-          .update({
-            status: "approved",
-            reviewed_at: new Date().toISOString()
-          })
-          .eq("id", s.id)
-          .eq("status", "pending");
+    const { error } = await db
+      .from("submissions")
+      .update({
+        status: "approved",
+        reviewed_at: new Date().toISOString()
+      })
+      .eq("id", s.id)
+      .eq("status", "pending");
 
-        if (error) {
-          alert("Gagal menyetujui: " + error.message);
-          return;
-        }
-
-        alert("Pengajuan berhasil disetujui!");
-        loadAdminSubmissions();
-      };
-
-      const reject = document.createElement("button");
-      reject.textContent = "Reject";
-
-      reject.onclick = async () => {
-        const note = prompt("Masukkan alasan penolakan:");
-        if (note === null || !note.trim()) return;
-
-        const { error } = await db
-          .from("submissions")
-          .update({
-            status: "rejected",
-            review_note: note.trim(),
-            reviewed_at: new Date().toISOString()
-          })
-          .eq("id", s.id)
-          .eq("status", "pending");
-
-        if (error) {
-          alert("Gagal menolak: " + error.message);
-          return;
-        }
-
-        alert("Pengajuan berhasil ditolak!");
-        loadAdminSubmissions();
-      };
-
-      item.appendChild(approve);
-      item.appendChild(reject);
+    if (error) {
+      alert("Gagal menyetujui: " + error.message);
+      return;
     }
 
-    target.appendChild(item);
-  });
+    alert("Pengajuan disetujui!");
+    loadAdminSubmissions();
+  };
+
+  const reject = document.createElement("button");
+  reject.textContent = "Reject";
+  reject.className = "secondary";
+
+  reject.onclick = async () => {
+    const note = prompt("Alasan penolakan:");
+    if (!note || !note.trim()) return;
+
+    const { error } = await db
+      .from("submissions")
+      .update({
+        status: "rejected",
+        review_note: note.trim(),
+        reviewed_at: new Date().toISOString()
+      })
+      .eq("id", s.id)
+      .eq("status", "pending");
+
+    if (error) {
+      alert("Gagal menolak: " + error.message);
+      return;
+    }
+
+    alert("Pengajuan ditolak!");
+    loadAdminSubmissions();
+  };
+
+  item.appendChild(approve);
+  item.appendChild(reject);
 }
-
-
-db.auth.onAuthStateChange((event, session) => {
-  if (session?.user) {
-    setTimeout(loadApp, 0);
-  }
-});
-
-loadApp();
-</script>
-</body>
-</html>
