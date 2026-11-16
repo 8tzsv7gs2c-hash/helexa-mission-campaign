@@ -245,7 +245,10 @@ async function loadHistory() {
 }
 
 async function loadAdminSubmissions() {
+  
+async function loadAdminSubmissions() {
   const target = document.getElementById("adminSubmissions");
+
   const { data, error } = await db
     .from("submissions")
     .select("id,proof_text,status,created_at,missions(title)")
@@ -262,16 +265,78 @@ async function loadAdminSubmissions() {
   }
 
   target.innerHTML = "";
+
   data.forEach(s => {
     const item = document.createElement("div");
     item.className = "mission";
+
     const info = document.createElement("p");
-    info.textContent = (s.missions?.title || "Misi") +
-      " — " + s.status + " — Bukti: " + (s.proof_text || "");
+    info.textContent =
+      (s.missions?.title || "Misi") +
+      " — Status: " + s.status +
+      " — Bukti: " + (s.proof_text || "");
+
     item.appendChild(info);
+
+    if (s.status === "pending") {
+      const approve = document.createElement("button");
+      approve.textContent = "Approve";
+
+      approve.onclick = async () => {
+        if (!confirm("Setujui pengajuan ini?")) return;
+
+        const { error } = await db
+          .from("submissions")
+          .update({
+            status: "approved",
+            reviewed_at: new Date().toISOString()
+          })
+          .eq("id", s.id)
+          .eq("status", "pending");
+
+        if (error) {
+          alert("Gagal menyetujui: " + error.message);
+          return;
+        }
+
+        alert("Pengajuan berhasil disetujui!");
+        loadAdminSubmissions();
+      };
+
+      const reject = document.createElement("button");
+      reject.textContent = "Reject";
+
+      reject.onclick = async () => {
+        const note = prompt("Masukkan alasan penolakan:");
+        if (note === null || !note.trim()) return;
+
+        const { error } = await db
+          .from("submissions")
+          .update({
+            status: "rejected",
+            review_note: note.trim(),
+            reviewed_at: new Date().toISOString()
+          })
+          .eq("id", s.id)
+          .eq("status", "pending");
+
+        if (error) {
+          alert("Gagal menolak: " + error.message);
+          return;
+        }
+
+        alert("Pengajuan berhasil ditolak!");
+        loadAdminSubmissions();
+      };
+
+      item.appendChild(approve);
+      item.appendChild(reject);
+    }
+
     target.appendChild(item);
   });
 }
+
 
 db.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
