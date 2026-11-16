@@ -277,6 +277,9 @@ async function loadAdminSubmissions() {
 const test = document.createElement("p");
 test.textContent = "TES TOMBOL BERHASIL";
 item.appendChild(test);
+    const debug = document.createElement("p");
+debug.textContent = "STATUS TERBACA: [" + s.status + "]";
+item.appendChild(debug);
     if (s.status === "pending") {
   const approve = document.createElement("button");
   approve.textContent = "Approve";
