@@ -52,8 +52,17 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .submission-section{border-top:1px solid #34445b;padding-top:12px;margin-top:12px}
 .submission-label{font-size:12px;color:#a9bbd2;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
 .member-id-small{font-size:12px;color:#a9bbd2;word-break:break-all}
+
+/* ADMIN STATISTICS */
+.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.stat-box{background:#101d30;border:1px solid #34445b;border-radius:12px;padding:17px;min-width:0}
+.stat-box.highlight{border-color:#237b5d;background:linear-gradient(135deg,#123d32,#101d30)}
+.stat-label{font-size:12px;color:#a9bbd2;letter-spacing:.5px}
+.stat-number{font-size:27px;font-weight:bold;color:#20d89a;margin-top:10px;overflow-wrap:anywhere}
+.stat-box.highlight .stat-number{font-size:23px}
 footer{text-align:center;color:#8295ae;padding:30px;font-size:12px}
-@media(max-width:600px){.form-grid{grid-template-columns:1fr}main{margin:18px auto}.card{padding:17px}h1{font-size:23px}.profile-line{flex-direction:column;gap:4px}}
+@media(min-width:700px){.stats-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}main{margin:18px auto}.card{padding:17px}h1{font-size:23px}.profile-line{flex-direction:column;gap:4px}.stat-number{font-size:23px}}
 </style>
 </head>
 <body>
@@ -126,6 +135,42 @@ footer{text-align:center;color:#8295ae;padding:30px;font-size:12px}
 <div class="card">
 <h1 data-i18n="adminPanel">Panel Admin</h1>
 <p class="muted" data-i18n="adminIntro">Kelola misi, gambar, reward, dan pengajuan anggota.</p>
+</div>
+
+<!-- DASHBOARD STATISTIK ADMIN -->
+<div class="card">
+<h2 data-i18n="statisticsTitle">📊 Statistik HELEXA</h2>
+<p class="muted" data-i18n="statisticsIntro">Ringkasan aktivitas dan perkembangan platform.</p>
+
+<div class="stats-grid">
+<div class="stat-box">
+<div class="stat-label" data-i18n="totalMembers">TOTAL MEMBER</div>
+<div class="stat-number" id="statMembers">...</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-label" data-i18n="totalMissions">TOTAL MISI</div>
+<div class="stat-number" id="statMissions">...</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-label" data-i18n="pendingSubmissions">PENGAJUAN PENDING</div>
+<div class="stat-number" id="statPending">...</div>
+</div>
+
+<div class="stat-box">
+<div class="stat-label" data-i18n="approvedSubmissions">PENGAJUAN APPROVED</div>
+<div class="stat-number" id="statApproved">...</div>
+</div>
+
+<div class="stat-box highlight" style="grid-column:1/-1">
+<div class="stat-label" data-i18n="totalRewards">TOTAL REWARD DIBAGIKAN</div>
+<div class="stat-number" id="statRewards">...</div>
+</div>
+</div>
+
+<p id="statsError" class="muted hidden"></p>
+<button class="secondary" onclick="loadAdminStats()" data-i18n="refreshStats">Muat Ulang Statistik</button>
 </div>
 
 <div class="card" id="missionFormCard">
@@ -223,6 +268,11 @@ rewardBalanceInfo:"Saldo reward yang tercatat.",walletDetails:"Lihat Detail Wall
 availableMissions:"Misi tersedia",missionIntro:"Pilih misi, selesaikan instruksi, lalu kirim bukti untuk diperiksa admin.",
 myHistory:"Riwayat pengajuan saya",adminPanel:"Panel Admin",
 adminIntro:"Kelola misi, gambar, reward, dan pengajuan anggota.",
+statisticsTitle:"📊 Statistik HELEXA",statisticsIntro:"Ringkasan aktivitas dan perkembangan platform.",
+totalMembers:"TOTAL MEMBER",totalMissions:"TOTAL MISI",
+pendingSubmissions:"PENGAJUAN PENDING",approvedSubmissions:"PENGAJUAN APPROVED",
+totalRewards:"TOTAL REWARD DIBAGIKAN",refreshStats:"Muat Ulang Statistik",
+statsLoadError:"Sebagian statistik gagal dimuat: ",
 addMission:"+ Tambah Misi Baru",missionFormIntro:"Isi informasi misi dan reward yang akan diterima anggota.",
 missionTitle:"Judul misi",missionDescription:"Deskripsi dan instruksi misi",category:"Kategori",
 reward:"Reward (Rupiah)",missionStatus:"Status misi",activeOption:"Aktif — tampil ke anggota",
@@ -275,6 +325,11 @@ rewardBalanceInfo:"Recorded reward balance.",walletDetails:"View Wallet Details"
 availableMissions:"Available Missions",missionIntro:"Choose a mission, complete the instructions, and submit proof for admin review.",
 myHistory:"My Submission History",adminPanel:"Admin Panel",
 adminIntro:"Manage missions, images, rewards, and member submissions.",
+statisticsTitle:"📊 HELEXA Statistics",statisticsIntro:"Platform activity and performance overview.",
+totalMembers:"TOTAL MEMBERS",totalMissions:"TOTAL MISSIONS",
+pendingSubmissions:"PENDING SUBMISSIONS",approvedSubmissions:"APPROVED SUBMISSIONS",
+totalRewards:"TOTAL REWARDS DISTRIBUTED",refreshStats:"Refresh Statistics",
+statsLoadError:"Some statistics could not be loaded: ",
 addMission:"+ Add New Mission",missionFormIntro:"Enter mission details and the reward members will receive.",
 missionTitle:"Mission Title",missionDescription:"Mission Description and Instructions",category:"Category",
 reward:"Reward (IDR)",missionStatus:"Mission Status",activeOption:"Active — visible to members",
@@ -413,12 +468,60 @@ async function loadApp(){
 
   if(profile.role==="admin"){
     document.getElementById("admin").classList.remove("hidden");
+    await loadAdminStats();
     await loadAdminMissions();
     await loadAdminSubmissions();
   }
   await loadMissions();
   await loadHistory();
   await loadWallet();
+}
+
+/* MEMUAT STATISTIK ADMIN */
+async function loadAdminStats(){
+  if(currentProfile?.role!=="admin") return;
+
+  const ids=["statMembers","statMissions","statPending","statApproved","statRewards"];
+  ids.forEach(id=>document.getElementById(id).textContent="...");
+
+  const errorBox=document.getElementById("statsError");
+  errorBox.classList.add("hidden");
+  errorBox.textContent="";
+
+  const results=await Promise.all([
+    db.from("profiles").select("id",{count:"exact",head:true}),
+    db.from("missions").select("id",{count:"exact",head:true}),
+    db.from("submissions").select("id",{count:"exact",head:true}).eq("status","pending"),
+    db.from("submissions").select("id",{count:"exact",head:true}).eq("status","approved"),
+    db.from("wallet_transactions").select("amount_idr").eq("transaction_type","reward")
+  ]);
+
+  const labels=["statMembers","statMissions","statPending","statApproved"];
+  const errors=[];
+
+  results.slice(0,4).forEach((result,index)=>{
+    const element=document.getElementById(labels[index]);
+    if(result.error){
+      element.textContent="-";
+      errors.push(result.error.message);
+    }else{
+      element.textContent=Number(result.count||0).toLocaleString(currentLanguage==="id"?"id-ID":"en-US");
+    }
+  });
+
+  const rewardResult=results[4];
+  if(rewardResult.error){
+    document.getElementById("statRewards").textContent="-";
+    errors.push(rewardResult.error.message);
+  }else{
+    const total=(rewardResult.data||[]).reduce((sum,item)=>sum+Number(item.amount_idr||0),0);
+    document.getElementById("statRewards").textContent=formatRupiah(total);
+  }
+
+  if(errors.length){
+    errorBox.textContent=t("statsLoadError")+errors.join(" | ");
+    errorBox.classList.remove("hidden");
+  }
 }
 
 function validateProofFile(file){
@@ -674,7 +777,7 @@ document.getElementById("missionForm").addEventListener("submit",async function(
     else result=await db.from("missions").insert({...missionData,created_by:currentUser.id});
     if(result.error) throw result.error;
     alert(wasEditing?t("missionUpdated"):t("missionSaved"));
-    resetMissionForm();await loadAdminMissions();await loadMissions();
+    resetMissionForm();await loadAdminMissions();await loadMissions();await loadAdminStats();
   }catch(error){alert("Error: "+error.message)}
   finally{saveButton.disabled=false;saveButton.textContent=t("publishMission")}
 });
@@ -710,7 +813,7 @@ async function deleteMission(id){
   if(!confirm(t("deleteConfirm"))) return;
   const {error}=await db.from("missions").delete().eq("id",id);
   if(error){alert(error.message);return}
-  alert(t("missionDeleted"));await loadAdminMissions();await loadMissions();
+  alert(t("missionDeleted"));await loadAdminMissions();await loadMissions();await loadAdminStats();
 }
 
 async function loadAdminMissions(){
@@ -741,8 +844,7 @@ async function loadAdminMissions(){
   });
 }
 
-/* Ambil nama dan nomor member dari tabel profiles secara terpisah.
-   Ini menghindari ketergantungan pada relasi foreign key di Supabase. */
+/* Ambil nama dan nomor member dari tabel profiles secara terpisah. */
 async function loadAdminSubmissions(){
   const target=document.getElementById("adminSubmissions");
   target.dataset.loaded="yes";target.textContent=t("loading");
@@ -881,6 +983,7 @@ async function loadAdminSubmissions(){
         await loadAdminSubmissions();
         await loadHistory();
         await loadWallet();
+        await loadAdminStats();
       };
 
       const reject=document.createElement("button");
@@ -903,6 +1006,7 @@ async function loadAdminSubmissions(){
         if(!updated){alert("Submission could not be updated.");await loadAdminSubmissions();return}
         alert(t("rejectedMessage"));
         await loadAdminSubmissions();
+        await loadAdminStats();
       };
 
       actions.append(approve,reject);
