@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HELEXA MISSION CAMPAIGN — Misi Berhadiah</title>
+<style>
+:root{--navy:#101b2d;--panel:#17263b;--line:#293b53;--green:#20b879;--muted:#9aabc1;--bg:#0b1422}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f4f7fb;font:15px Inter,system-ui,Arial,sans-serif}
+header{height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 max(20px,calc((100% - 1120px)/2));background:#101b2d;position:sticky;top:0}
+.brand{font-weight:850;letter-spacing:.08em}.brand span{color:var(--green)}.wrap{max-width:1120px;margin:28px auto;padding:0 20px}
+nav{display:flex;gap:8px;flex-wrap:wrap}.tab,button{border:0;border-radius:10px;padding:10px 14px;background:#253750;color:#eaf1f8;cursor:pointer;font-weight:650}.tab.active,button.primary{background:var(--green);color:#062316}
+.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:20px;margin-bottom:16px}
+.eyebrow{font-size:12px;color:var(--muted);letter-spacing:.1em}.balance{font-size:34px;font-weight:800;margin:7px 0 16px}.actions{display:flex;gap:10px;flex-wrap:wrap}
+h1{font-size:27px;margin:0 0 8px}h2{font-size:18px;margin:0 0 14px}.muted{color:var(--muted)}.mission{display:flex;justify-content:space-between;gap:15px;align-items:center;border-top:1px solid var(--line);padding:16px 0}.mission:first-of-type{border-top:0}.reward{color:#5ce0a9;font-weight:800;font-size:18px;white-space:nowrap}.pill{font-size:11px;border-radius:30px;padding:5px 9px;background:#234b40;color:#7de7ba;display:inline-block;margin-bottom:6px}
+input,select,textarea{width:100%;background:#0e1a2b;border:1px solid var(--line);border-radius:9px;padding:11px;color:white;margin:6px 0 13px;font:inherit}label{font-size:13px;color:#c4d0df}textarea{min-height:85px;resize:vertical}.hidden{display:none}.notice{font-size:12px;color:#b5c4d6;line-height:1.6;background:#102c2a;border:1px solid #235446;padding:12px;border-radius:10px}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:28px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.wrap{margin:18px auto}header{padding:0 16px}.balance{font-size:29px}}
+</style></head>
+<body>
+<header><div class="brand">HELEXA</div><nav><button class="tab active" data-tab="member">Member</button><button class="tab" data-tab="wallet">Dompet</button><button class="tab" data-tab="admin">Admin demo</button></nav></header>
+<main class="wrap">
+<section id="member">
+<div style="margin-bottom:20px"><div class="eyebrow">AREA MEMBER</div><h1>Selesaikan misi, kumpulkan reward.</h1><div class="muted">Selesaikan tugas yang tersedia dan kirim bukti untuk ditinjau admin.</div></div>
+<div class="grid"><div>
+<div class="card"><div class="eyebrow">SALDO TERSEDIA · SIMULASI</div><div class="balance" id="balance">Rp125.000</div><div class="actions"><button class="primary" data-go="wallet">Ajukan penarikan</button><button data-go="wallet">Lihat transaksi</button></div></div>
+<div class="card"><h2>Misi tersedia</h2><div id="missions">
+<div class="mission"><div><span class="pill">Media sosial</span><strong>Ikuti akun media sosial mitra</strong><div class="muted">Ikuti instruksi dan lampirkan bukti yang diminta.</div></div><div style="text-align:right"><div class="reward">Rp5.000</div><button onclick="submitMission('Ikuti akun media sosial mitra')">Kerjakan</button></div></div>
+<div class="mission"><div><span class="pill">Survei</span><strong>Isi survei pengalaman pengguna</strong><div class="muted">Jawab pertanyaan survei secara jujur.</div></div><div style="text-align:right"><div class="reward">Rp10.000</div><button onclick="submitMission('Isi survei pengalaman pengguna')">Kerjakan</button></div></div>
+<div class="mission"><div><span class="pill">Promosi</span><strong>Bagikan informasi produk mitra</strong><div class="muted">Gunakan materi promosi resmi yang disediakan.</div></div><div style="text-align:right"><div class="reward">Rp15.000</div><button onclick="submitMission('Bagikan informasi produk mitra')">Kerjakan</button></div></div>
+</div></div></div>
+<div><div class="card"><h2>Aktivitas saya</h2><div id="activity" class="muted">Belum ada pengajuan misi.</div></div><div class="card"><h2>Informasi</h2><p class="muted">Reward hanya diberikan untuk tugas yang valid dan telah diverifikasi. Jangan membayar biaya untuk membuka misi atau mencairkan reward.</p><div class="notice">Demo antarmuka: saldo dan transaksi di halaman ini bukan uang sungguhan. Pembayaran nyata memerlukan backend aman, verifikasi tugas, serta integrasi penyedia pembayaran resmi.</div></div></div></div>
+</section>
+<section id="wallet" class="hidden"><div class="eyebrow">DOMPET MEMBER</div><h1>Deposit & penarikan</h1><p class="muted">Form demo untuk rancangan alur pembayaran.</p><div class="grid"><div class="card"><h2>Ajukan penarikan reward</h2><label>Jumlah (Rp)</label><input id="amount" type="number" min="10000" placeholder="Contoh: 50000"><label>Metode</label><select id="method"><option>Transfer bank</option><option>DANA</option><option>OVO</option><option>GoPay</option><option>LinkAja</option></select><label>Nomor rekening / akun e-wallet</label><input placeholder="Masukkan atas nama sendiri"><button class="primary" onclick="withdraw()">Kirim pengajuan demo</button></div><div class="card"><h2>Riwayat transaksi</h2><div id="transactions" class="muted">Belum ada transaksi.</div><p class="muted">Deposit belum diaktifkan pada demo. Pada versi produksi, deposit harus melalui payment gateway resmi dan callback pembayaran terverifikasi.</p></div></div></section>
+<section id="admin" class="hidden"><div class="eyebrow">PANEL ADMIN · DEMO</div><h1>Kelola misi & pengajuan</h1><div class="grid"><div class="card"><h2>Buat misi baru</h2><label>Nama misi</label><input id="missionName" placeholder="Contoh: Uji aplikasi mitra"><label>Kategori</label><select id="category"><option>Survei</option><option>Media sosial</option><option>Promosi</option><option>Lainnya</option></select><label>Reward (Rp)</label><input id="missionReward" type="number" placeholder="Contoh: 10000"><button class="primary" onclick="addMission()">Tambah misi demo</button></div><div class="card"><h2>Pengajuan member</h2><div id="submissions" class="muted">Belum ada pengajuan. Coba kerjakan misi dari tab Member.</div></div></div></section>
+</main><footer>HELEXA MISSION CAMPAIGN · Prototipe UI — bukan layanan pembayaran aktif</footer>
+<script>
+let balance=125000, submissions=[];
+const fmt=n=>'Rp'+Number(n).toLocaleString('id-ID');
+function show(tab){document.querySelectorAll('main section').forEach(s=>s.classList.add('hidden'));document.getElementById(tab).classList.remove('hidden');document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab))}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>show(b.dataset.tab));
+document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>show(b.dataset.go));
+function submitMission(name){const proof=prompt('Masukkan tautan bukti atau keterangan pengerjaan (demo):');if(!proof)return;submissions.push({name,proof,status:'Menunggu verifikasi'});render();alert('Pengajuan demo tercatat. Reward belum ditambahkan sampai diverifikasi.')}
+function withdraw(){const n=Number(document.getElementById('amount').value);if(!n||n<10000){alert('Masukkan jumlah minimal Rp10.000.');return}if(n>balance){alert('Saldo demo tidak mencukupi.');return}document.getElementById('transactions').innerHTML='<div>Pengajuan penarikan '+fmt(n)+' · Menunggu verifikasi (demo)</div>';alert('Pengajuan demo dicatat. Tidak ada uang yang ditransfer.')}
+function addMission(){const name=document.getElementById('missionName').value;const reward=Number(document.getElementById('missionReward').value);if(!name||!reward){alert('Lengkapi nama misi dan reward.');return}const d=document.createElement('div');d.className='mission';d.innerHTML='<div><span class="pill"></span><strong></strong><div class="muted">Misi baru dari admin demo.</div></div><div style="text-align:right"><div class="reward"></div><button disabled>Segera tersedia</button></div>';d.querySelector('.pill').textContent=document.getElementById('category').value;d.querySelector('strong').textContent=name;d.querySelector('.reward').textContent=fmt(reward);document.getElementById('missions').appendChild(d);alert('Misi demo ditambahkan.')}
+function render(){document.getElementById('activity').innerHTML=submissions.map(s=>'<div style="padding:9px 0;border-bottom:1px solid #293b53"><strong>'+s.name+'</strong><div class="muted">'+s.status+'</div></div>').join('')||'Belum ada pengajuan misi.';document.getElementById('submissions').innerHTML=submissions.map(s=>'<div style="padding:9px 0;border-bottom:1px solid #293b53"><strong>'+s.name+'</strong><div class="muted">'+s.proof+'</div><div class="pill">'+s.status+'</div></div>').join('')||'Belum ada pengajuan.'}
+</script></body></html>
