@@ -6,12 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HELEXA MISSION CAMPAIGN</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#0b1422;color:#f4f7fb;font-family:Arial,sans-serif}
-header{background:#101b2d;padding:20px 5%;border-bottom:1px solid #293b53}
+header{background:#101b2d;padding:20px 5%;border-bottom:1px solid #293b53;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 header strong{color:#20d89a;letter-spacing:2px}
+header select{width:auto;margin:0;min-width:145px}
 main{max-width:1050px;margin:30px auto;padding:0 16px}
 .card{background:#17263b;border:1px solid #293b53;border-radius:15px;padding:22px;margin:15px 0}
 h1{font-size:26px}h2{font-size:20px}
@@ -30,6 +30,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .wallet-balance{font-size:30px;font-weight:bold;margin:12px 0}
 .transaction,.mission{border-top:1px solid #34445b;padding:15px 0}
 .transaction-amount{color:#20d89a;font-weight:bold}
+.transaction-date{font-size:12px;color:#a9bbd2}
 .admin-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .admin-actions button{margin:0}
 .mission-image{width:100%;max-height:230px;object-fit:cover;border-radius:10px;margin:10px 0}
@@ -40,117 +41,132 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .status{display:inline-block;padding:5px 9px;border-radius:20px;background:#263d58;color:#c8d8eb;font-size:12px}
 .status.active{background:#164b3b;color:#70edb7}
 .status.paused{background:#493a25;color:#ffd28a}
+.profile-card{background:#101d30;border:1px solid #237b5d;border-radius:12px;padding:16px;margin-top:15px}
+.profile-line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #34445b}
+.member-number{font-size:22px;font-weight:bold;color:#20d89a;letter-spacing:2px}
 footer{text-align:center;color:#8295ae;padding:30px;font-size:12px}
-@media(max-width:600px){.form-grid{grid-template-columns:1fr}main{margin:18px auto}.card{padding:17px}h1{font-size:23px}}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}main{margin:18px auto}.card{padding:17px}h1{font-size:23px}.profile-line{flex-direction:column;gap:4px}}
 </style>
 </head>
-
 <body>
-<header><strong>HELEXA MISSION CAMPAIGN</strong></header>
+
+<header>
+<strong>HELEXA MISSION CAMPAIGN</strong>
+<select id="languageSelect" onchange="changeLanguage(this.value)" aria-label="Language">
+<option value="id">🇮🇩 Bahasa Indonesia</option>
+<option value="en">🇬🇧 English</option>
+</select>
+</header>
 
 <main>
 <section id="auth" class="card">
-<h1>Selamat datang di HELEXA</h1>
-<p class="muted">Masuk ke akun atau daftar sebagai anggota baru.</p>
+<h1 data-i18n="welcomeTitle">Selamat datang di HELEXA</h1>
+<p class="muted" data-i18n="authIntro">Masuk ke akun atau daftar sebagai anggota baru.</p>
 <div id="message">Silakan masuk atau buat akun.</div>
 
-<label>Nama (untuk pendaftaran)</label>
+<label data-i18n="nameLabel">Nama (untuk pendaftaran)</label>
 <input id="name" placeholder="Nama lengkap">
 <label>Email</label>
 <input id="email" type="email" placeholder="nama@email.com">
-<label>Password</label>
+<label data-i18n="passwordLabel">Password</label>
 <input id="password" type="password" placeholder="Minimal 8 karakter">
-<button onclick="register()">Daftar</button>
-<button class="secondary" onclick="login()">Masuk</button>
+<button onclick="register()" data-i18n="register">Daftar</button>
+<button class="secondary" onclick="login()" data-i18n="login">Masuk</button>
 </section>
 
 <section id="dashboard" class="hidden">
 <div id="homePage">
-
 <div class="card">
-<h1>Dashboard HELEXA</h1>
+<h1 data-i18n="dashboardTitle">Dashboard HELEXA</h1>
 <p id="welcome" class="muted"></p>
-<button onclick="openWallet()">Wallet Saya</button>
-<button class="secondary" onclick="logout()">Keluar</button>
+
+<div class="profile-card">
+<h2 data-i18n="memberProfile">Profil Anggota</h2>
+<div class="profile-line">
+<span class="muted" data-i18n="memberName">Nama Member</span>
+<strong id="memberName">-</strong>
+</div>
+<div class="profile-line" style="border:0">
+<span class="muted">Member ID</span>
+<strong class="member-number" id="memberNumber">------</strong>
+</div>
+</div>
+
+<button onclick="openWallet()" data-i18n="myWallet">Wallet Saya</button>
+<button class="secondary" onclick="logout()" data-i18n="logout">Keluar</button>
 </div>
 
 <div class="card">
-<h2>Wallet Saya</h2>
+<h2 data-i18n="myWallet">Wallet Saya</h2>
 <div class="wallet-card">
-<div class="wallet-label">SALDO WALLET</div>
+<div class="wallet-label" data-i18n="walletBalance">SALDO WALLET</div>
 <div class="wallet-balance" id="dashboardBalance">Rp0</div>
-<p class="muted">Saldo reward yang tercatat.</p>
-<button onclick="openWallet()">Lihat Detail Wallet</button>
+<p class="muted" data-i18n="rewardBalanceInfo">Saldo reward yang tercatat.</p>
+<button onclick="openWallet()" data-i18n="walletDetails">Lihat Detail Wallet</button>
 </div>
 </div>
 
 <div class="card">
-<h2>Misi tersedia</h2>
-<p class="muted">Pilih misi, selesaikan instruksi, lalu kirim bukti untuk diperiksa admin.</p>
+<h2 data-i18n="availableMissions">Misi tersedia</h2>
+<p class="muted" data-i18n="missionIntro">Pilih misi, selesaikan instruksi, lalu kirim bukti untuk diperiksa admin.</p>
 <div id="missions">Memuat misi...</div>
 </div>
 
 <div class="card">
-<h2>Riwayat pengajuan saya</h2>
+<h2 data-i18n="myHistory">Riwayat pengajuan saya</h2>
 <div id="history">Memuat riwayat...</div>
 </div>
 
 <section id="admin" class="hidden">
 <div class="card">
-<h1>Panel Admin</h1>
-<p class="muted">Kelola misi, gambar, reward, dan pengajuan anggota.</p>
+<h1 data-i18n="adminPanel">Panel Admin</h1>
+<p class="muted" data-i18n="adminIntro">Kelola misi, gambar, reward, dan pengajuan anggota.</p>
 </div>
 
 <div class="card" id="missionFormCard">
-<h2 id="missionFormTitle">+ Tambah Misi Baru</h2>
-<p class="muted">Isi informasi misi dan reward yang akan diterima anggota.</p>
-
+<h2 id="missionFormTitle" data-i18n="addMission">+ Tambah Misi Baru</h2>
+<p class="muted" data-i18n="missionFormIntro">Isi informasi misi dan reward yang akan diterima anggota.</p>
 <form id="missionForm">
-<label>Judul misi</label>
+<label data-i18n="missionTitle">Judul misi</label>
 <input id="missionTitle" maxlength="150" required placeholder="Contoh: Follow Instagram HELEXA">
-
-<label>Deskripsi dan instruksi misi</label>
+<label data-i18n="missionDescription">Deskripsi dan instruksi misi</label>
 <textarea id="missionDescription" required placeholder="Jelaskan langkah-langkah yang harus dilakukan anggota..."></textarea>
-
 <div class="form-grid">
 <div>
-<label>Kategori</label>
+<label data-i18n="category">Kategori</label>
 <input id="missionCategory" placeholder="Contoh: Sosial Media">
 </div>
 <div>
-<label>Reward (Rupiah)</label>
+<label data-i18n="reward">Reward (Rupiah)</label>
 <input id="missionReward" type="number" min="0" step="1" required placeholder="5000">
 </div>
 </div>
-
-<label>Status misi</label>
+<label data-i18n="missionStatus">Status misi</label>
 <select id="missionStatus">
-<option value="active">Aktif — tampil ke anggota</option>
-<option value="paused">Nonaktif — disembunyikan</option>
+<option value="active" data-i18n="activeOption">Aktif — tampil ke anggota</option>
+<option value="paused" data-i18n="pausedOption">Nonaktif — disembunyikan</option>
 </select>
-
-<label>Gambar misi</label>
+<label data-i18n="missionImage">Gambar misi</label>
 <input id="missionImage" type="file" accept="image/png,image/jpeg,image/webp">
-<p class="muted">Format JPG, PNG, atau WEBP. Maksimal 5 MB.</p>
+<p class="muted" data-i18n="imageLimit">Format JPG, PNG, atau WEBP. Maksimal 5 MB.</p>
 <img id="imagePreview" class="preview-image hidden" alt="Preview gambar misi">
-
 <div class="admin-actions">
-<button id="saveMissionButton" type="submit">Terbitkan Misi</button>
-<button id="cancelEditButton" type="button" class="secondary hidden" onclick="resetMissionForm()">Batal Edit</button>
+<button id="saveMissionButton" type="submit" data-i18n="publishMission">Terbitkan Misi</button>
+<button id="cancelEditButton" type="button" class="secondary hidden" onclick="resetMissionForm()" data-i18n="cancelEdit">Batal Edit</button>
 </div>
 </form>
 </div>
 
 <div class="card">
-<h2>Kelola Misi</h2>
-<p class="muted">Lihat, edit, atau hapus misi yang sudah dibuat.</p>
-<button class="secondary" onclick="loadAdminMissions()">Muat Ulang Misi</button>
+<h2 data-i18n="manageMissions">Kelola Misi</h2>
+<p class="muted" data-i18n="manageMissionsIntro">Lihat, edit, atau hapus misi yang sudah dibuat.</p>
+<button class="secondary" onclick="loadAdminMissions()" data-i18n="reloadMissions">Muat Ulang Misi</button>
 <div id="adminMissions">Memuat daftar misi...</div>
 </div>
 
 <div class="card">
-<h2>Pengajuan Anggota</h2>
-<p class="muted">Periksa bukti anggota dan tentukan apakah pengajuan diterima atau ditolak.</p>
+<h2 data-i18n="memberSubmissions">Pengajuan Anggota</h2>
+<p class="muted" data-i18n="reviewIntro">Periksa bukti anggota dan tentukan apakah pengajuan diterima atau ditolak.</p>
 <div id="adminSubmissions">Memuat pengajuan...</div>
 </div>
 </section>
@@ -158,70 +174,216 @@ footer{text-align:center;color:#8295ae;padding:30px;font-size:12px}
 
 <section id="walletPage" class="hidden">
 <div class="card">
-<h1>Wallet Saya</h1>
-<p class="muted">Saldo dan riwayat reward anggota.</p>
+<h1 data-i18n="myWallet">Wallet Saya</h1>
+<p class="muted" data-i18n="walletIntro">Saldo dan riwayat reward anggota.</p>
 <div class="wallet-card">
-<div class="wallet-label">TOTAL SALDO</div>
+<div class="wallet-label" data-i18n="totalBalance">TOTAL SALDO</div>
 <div class="wallet-balance" id="walletBalance">Rp0</div>
-<p class="muted">Berdasarkan catatan transaksi wallet.</p>
+<p class="muted" data-i18n="walletRecordInfo">Berdasarkan catatan transaksi wallet.</p>
 </div>
-<button class="secondary" onclick="closeWallet()">Kembali ke Dashboard</button>
-<button onclick="loadWallet()">Muat Ulang</button>
+<button class="secondary" onclick="closeWallet()" data-i18n="backDashboard">Kembali ke Dashboard</button>
+<button onclick="loadWallet()" data-i18n="reload">Muat Ulang</button>
 </div>
 <div class="card">
-<h2>Riwayat Transaksi</h2>
+<h2 data-i18n="transactionHistory">Riwayat Transaksi</h2>
 <div id="walletHistory">Memuat transaksi...</div>
 </div>
 </section>
 </section>
 </main>
-
 <footer>HELEXA MISSION CAMPAIGN · Sistem misi dan verifikasi</footer>
 
 <script>
 const SUPABASE_URL = "https://ezekjtkqhhvwtjbrljyg.supabase.co";
 const SUPABASE_KEY = "sb_publishable_UCXFOGlgRQHhaxwa8bSOFw_nCBo43a5";
 const BUCKET = "mission-images";
-
 const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
 let currentUser = null;
+let currentProfile = null;
+let currentLanguage = "id";
 let editingMissionId = null;
 let existingImageUrl = null;
+
+const translations = {
+id:{
+welcomeTitle:"Selamat datang di HELEXA",
+authIntro:"Masuk ke akun atau daftar sebagai anggota baru.",
+nameLabel:"Nama (untuk pendaftaran)",passwordLabel:"Password",
+register:"Daftar",login:"Masuk",dashboardTitle:"Dashboard HELEXA",
+memberProfile:"Profil Anggota",memberName:"Nama Member",myWallet:"Wallet Saya",
+logout:"Keluar",walletBalance:"SALDO WALLET",rewardBalanceInfo:"Saldo reward yang tercatat.",
+walletDetails:"Lihat Detail Wallet",availableMissions:"Misi tersedia",
+missionIntro:"Pilih misi, selesaikan instruksi, lalu kirim bukti untuk diperiksa admin.",
+myHistory:"Riwayat pengajuan saya",adminPanel:"Panel Admin",
+adminIntro:"Kelola misi, gambar, reward, dan pengajuan anggota.",
+addMission:"+ Tambah Misi Baru",missionFormIntro:"Isi informasi misi dan reward yang akan diterima anggota.",
+missionTitle:"Judul misi",missionDescription:"Deskripsi dan instruksi misi",
+category:"Kategori",reward:"Reward (Rupiah)",missionStatus:"Status misi",
+activeOption:"Aktif — tampil ke anggota",pausedOption:"Nonaktif — disembunyikan",
+missionImage:"Gambar misi",imageLimit:"Format JPG, PNG, atau WEBP. Maksimal 5 MB.",
+publishMission:"Terbitkan Misi",cancelEdit:"Batal Edit",manageMissions:"Kelola Misi",
+manageMissionsIntro:"Lihat, edit, atau hapus misi yang sudah dibuat.",
+reloadMissions:"Muat Ulang Misi",memberSubmissions:"Pengajuan Anggota",
+reviewIntro:"Periksa bukti anggota dan tentukan apakah pengajuan diterima atau ditolak.",
+walletIntro:"Saldo dan riwayat reward anggota.",totalBalance:"TOTAL SALDO",
+walletRecordInfo:"Berdasarkan catatan transaksi wallet.",backDashboard:"Kembali ke Dashboard",
+reload:"Muat Ulang",transactionHistory:"Riwayat Transaksi",
+loading:"Memuat...",noMissions:"Belum ada misi aktif.",sendProof:"Kirim bukti",
+rewardText:"Reward",noHistory:"Belum ada pengajuan misi.",status:"Status",
+noTransactions:"Belum ada transaksi wallet.",noAdminMissions:"Belum ada misi.",
+noSubmissions:"Belum ada pengajuan anggota.",edit:"Edit",delete:"Hapus",
+active:"Aktif",paused:"Nonaktif",categoryText:"Kategori",approve:"Setujui",
+reject:"Tolak",pending:"Menunggu",approved:"Disetujui",rejected:"Ditolak",
+rewardMission:"🎁 Reward Misi",withdrawal:"Penarikan Dana",deposit:"Deposit",
+adjustment:"Penyesuaian Saldo",noDescription:"Tidak ada deskripsi",
+unknownMission:"Misi",general:"Umum",saving:"Menyimpan...",
+editMission:"Edit Misi",saveChanges:"Simpan Perubahan",publish:"Terbitkan Misi",
+hello:"Halo",proofPrompt:"Masukkan link bukti atau keterangan penyelesaian misi:",
+proofSent:"Bukti berhasil dikirim dan menunggu pemeriksaan admin.",
+proofFailed:"Pengajuan gagal",checkMission:"Periksa judul, deskripsi, dan nominal reward.",
+uploadFormat:"Format gambar harus JPG, PNG, atau WEBP.",
+uploadSize:"Ukuran gambar maksimal 5 MB.",missionSaved:"Misi berhasil diterbitkan!",
+missionUpdated:"Misi berhasil diperbarui!",deleteConfirm:"Yakin ingin menghapus misi ini?",
+missionDeleted:"Misi berhasil dihapus.",approveConfirm:"Setujui pengajuan ini dan catat reward ke wallet anggota?",
+approvedMessage:"Pengajuan disetujui dan reward berhasil dicatat!",
+rejectPrompt:"Masukkan alasan penolakan:",rejectedMessage:"Pengajuan berhasil ditolak!",
+loginAgain:"Silakan login kembali.",profileError:"Profil belum dapat dibaca: ",
+memberIdError:"Nomor member belum tersedia. Hubungi admin.",
+authMessage:"Silakan masuk atau buat akun.",registered:"Pendaftaran berhasil. Periksa email untuk konfirmasi akun sebelum masuk.",
+passwordError:"Isi nama, email, dan password minimal 8 karakter."
+},
+en:{
+welcomeTitle:"Welcome to HELEXA",
+authIntro:"Log in or register as a new member.",
+nameLabel:"Name (for registration)",passwordLabel:"Password",
+register:"Register",login:"Log In",dashboardTitle:"HELEXA Dashboard",
+memberProfile:"Member Profile",memberName:"Member Name",myWallet:"My Wallet",
+logout:"Log Out",walletBalance:"WALLET BALANCE",rewardBalanceInfo:"Recorded reward balance.",
+walletDetails:"View Wallet Details",availableMissions:"Available Missions",
+missionIntro:"Choose a mission, complete the instructions, and submit proof for admin review.",
+myHistory:"My Submission History",adminPanel:"Admin Panel",
+adminIntro:"Manage missions, images, rewards, and member submissions.",
+addMission:"+ Add New Mission",missionFormIntro:"Enter mission details and the reward members will receive.",
+missionTitle:"Mission Title",missionDescription:"Mission Description and Instructions",
+category:"Category",reward:"Reward (IDR)",missionStatus:"Mission Status",
+activeOption:"Active — visible to members",pausedOption:"Paused — hidden",
+missionImage:"Mission Image",imageLimit:"JPG, PNG, or WEBP. Maximum 5 MB.",
+publishMission:"Publish Mission",cancelEdit:"Cancel Edit",manageMissions:"Manage Missions",
+manageMissionsIntro:"View, edit, or delete missions that have been created.",
+reloadMissions:"Reload Missions",memberSubmissions:"Member Submissions",
+reviewIntro:"Review member proof and decide whether to approve or reject submissions.",
+walletIntro:"Member balance and reward history.",totalBalance:"TOTAL BALANCE",
+walletRecordInfo:"Based on recorded wallet transactions.",backDashboard:"Back to Dashboard",
+reload:"Reload",transactionHistory:"Transaction History",
+loading:"Loading...",noMissions:"No active missions yet.",sendProof:"Submit Proof",
+rewardText:"Reward",noHistory:"No mission submissions yet.",status:"Status",
+noTransactions:"No wallet transactions yet.",noAdminMissions:"No missions yet.",
+noSubmissions:"No member submissions yet.",edit:"Edit",delete:"Delete",
+active:"Active",paused:"Paused",categoryText:"Category",approve:"Approve",
+reject:"Reject",pending:"Pending",approved:"Approved",rejected:"Rejected",
+rewardMission:"🎁 Mission Reward",withdrawal:"Withdrawal",deposit:"Deposit",
+adjustment:"Balance Adjustment",noDescription:"No description",
+unknownMission:"Mission",general:"General",saving:"Saving...",
+editMission:"Edit Mission",saveChanges:"Save Changes",publish:"Publish Mission",
+hello:"Hello",proofPrompt:"Enter proof link or describe how you completed the mission:",
+proofSent:"Proof submitted successfully and is awaiting admin review.",
+proofFailed:"Submission failed",checkMission:"Check the title, description, and reward amount.",
+uploadFormat:"Image format must be JPG, PNG, or WEBP.",
+uploadSize:"Maximum image size is 5 MB.",missionSaved:"Mission published successfully!",
+missionUpdated:"Mission updated successfully!",deleteConfirm:"Are you sure you want to delete this mission?",
+missionDeleted:"Mission deleted successfully.",approveConfirm:"Approve this submission and credit the reward to the member wallet?",
+approvedMessage:"Submission approved and reward successfully credited!",
+rejectPrompt:"Enter the reason for rejection:",rejectedMessage:"Submission rejected successfully!",
+loginAgain:"Please log in again.",profileError:"Unable to read profile: ",
+memberIdError:"Member number is not available. Please contact the admin.",
+authMessage:"Please log in or create an account.",registered:"Registration successful. Check your email to confirm your account before logging in.",
+passwordError:"Enter your name, email, and a password of at least 8 characters."
+}
+};
+
+function t(key){
+  return translations[currentLanguage]?.[key] || translations.id[key] || key;
+}
+
+function applyLanguage(){
+  document.documentElement.lang = currentLanguage;
+  document.getElementById("languageSelect").value = currentLanguage;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    if(translations[currentLanguage][key]) el.textContent = t(key);
+  });
+  document.getElementById("name").placeholder =
+    currentLanguage==="id" ? "Nama lengkap" : "Full name";
+  document.getElementById("password").placeholder =
+    currentLanguage==="id" ? "Minimal 8 karakter" : "At least 8 characters";
+  document.getElementById("missionTitle").placeholder =
+    currentLanguage==="id" ? "Contoh: Follow Instagram HELEXA" : "Example: Follow HELEXA on Instagram";
+  document.getElementById("missionDescription").placeholder =
+    currentLanguage==="id" ? "Jelaskan langkah-langkah yang harus dilakukan anggota..." : "Explain the steps members need to complete...";
+  document.getElementById("missionCategory").placeholder =
+    currentLanguage==="id" ? "Contoh: Sosial Media" : "Example: Social Media";
+  refreshDynamicText();
+}
+
+function refreshDynamicText(){
+  const missions = document.getElementById("missions");
+  if(missions.dataset.loaded === "yes") loadMissions();
+  const history = document.getElementById("history");
+  if(history.dataset.loaded === "yes") loadHistory();
+  const adminMissions = document.getElementById("adminMissions");
+  if(adminMissions.dataset.loaded === "yes" && currentProfile?.role==="admin") loadAdminMissions();
+  const submissions = document.getElementById("adminSubmissions");
+  if(submissions.dataset.loaded === "yes" && currentProfile?.role==="admin") loadAdminSubmissions();
+  if(currentUser) loadWallet();
+}
+
+async function changeLanguage(language){
+  if(!["id","en"].includes(language)) return;
+  currentLanguage = language;
+  applyLanguage();
+
+  if(currentUser){
+    const {error} = await db.from("profiles")
+      .update({preferred_language:language})
+      .eq("id",currentUser.id);
+    if(error){
+      alert((language==="id" ? "Bahasa berubah di halaman, tetapi gagal disimpan: " : "Language changed on this page but could not be saved: ")+error.message);
+    }
+  }
+}
 
 function message(text){
   document.getElementById("message").textContent = text;
 }
 
 function formatRupiah(amount){
-  return "Rp" + Number(amount || 0).toLocaleString("id-ID");
+  return "Rp"+Number(amount || 0).toLocaleString("id-ID");
+}
+
+function statusLabel(status){
+  return t(status==="approved" ? "approved" : status==="rejected" ? "rejected" : "pending");
 }
 
 async function register(){
   const name = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-
   if(!name || !email || password.length < 8){
-    message("Isi nama, email, dan password minimal 8 karakter.");
+    message(t("passwordError"));
     return;
   }
-
   const {error} = await db.auth.signUp({
     email,password,
-    options:{
-      data:{display_name:name},
-      emailRedirectTo:location.origin
-    }
+    options:{data:{display_name:name},emailRedirectTo:location.origin}
   });
-
   if(error) return message(error.message);
-  message("Pendaftaran berhasil. Periksa email untuk konfirmasi akun sebelum masuk.");
+  message(t("registered"));
 }
 
 async function login(){
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
-
   const {error} = await db.auth.signInWithPassword({email,password});
   if(error) return message(error.message);
   await loadApp();
@@ -230,6 +392,7 @@ async function login(){
 async function logout(){
   await db.auth.signOut();
   currentUser = null;
+  currentProfile = null;
   document.getElementById("dashboard").classList.add("hidden");
   document.getElementById("auth").classList.remove("hidden");
   document.getElementById("walletPage").classList.add("hidden");
@@ -239,8 +402,8 @@ async function logout(){
 async function loadApp(){
   const {data:{user}} = await db.auth.getUser();
   if(!user) return;
-
   currentUser = user;
+
   document.getElementById("auth").classList.add("hidden");
   document.getElementById("dashboard").classList.remove("hidden");
   document.getElementById("homePage").classList.remove("hidden");
@@ -249,17 +412,31 @@ async function loadApp(){
 
   const {data:profile,error:profileError} = await db
     .from("profiles")
-    .select("display_name,role")
+    .select("display_name,role,member_number,preferred_language")
     .eq("id",user.id)
     .single();
 
   if(profileError){
-    alert("Profil belum dapat dibaca: "+profileError.message);
+    alert(t("profileError")+profileError.message);
     return;
   }
 
+  currentProfile = profile;
+  currentLanguage = profile.preferred_language || "id";
+  applyLanguage();
+
   document.getElementById("welcome").textContent =
-    "Halo, "+(profile.display_name || user.email);
+    t("hello")+", "+(profile.display_name || user.email);
+  document.getElementById("memberName").textContent =
+    profile.display_name || user.email || "-";
+  document.getElementById("memberNumber").textContent =
+    profile.member_number != null
+      ? String(profile.member_number).padStart(5,"0")
+      : "Belum tersedia";
+
+  if(profile.member_number == null){
+    console.warn("Profil ini belum memiliki member_number.");
+  }
 
   if(profile.role === "admin"){
     document.getElementById("admin").classList.remove("hidden");
@@ -274,165 +451,116 @@ async function loadApp(){
 
 async function loadMissions(){
   const target = document.getElementById("missions");
-  target.textContent = "Memuat misi...";
+  target.textContent = t("loading");
+  target.dataset.loaded = "yes";
 
-  const {data,error} = await db
-    .from("missions")
+  const {data,error} = await db.from("missions")
     .select("id,title,description,category,reward_idr,image_url")
-    .eq("status","active")
-    .order("created_at",{ascending:false});
+    .eq("status","active").order("created_at",{ascending:false});
 
-  if(error){
-    target.textContent = "Gagal memuat misi: "+error.message;
-    return;
-  }
-
-  if(!data || !data.length){
-    target.textContent = "Belum ada misi aktif.";
-    return;
-  }
+  if(error){target.textContent = error.message;return;}
+  if(!data || !data.length){target.textContent=t("noMissions");return;}
 
   target.innerHTML = "";
-
   data.forEach(m=>{
     const item = document.createElement("div");
     item.className = "mission";
-
     if(m.image_url){
       const img = document.createElement("img");
       img.className = "mission-image";
       img.src = m.image_url;
-      img.alt = m.title || "Gambar misi";
+      img.alt = m.title || "Mission image";
       item.appendChild(img);
     }
-
     const title = document.createElement("strong");
     title.textContent = m.title;
-
     const category = document.createElement("p");
     category.className = "muted";
-    category.textContent = m.category || "Umum";
-
+    category.textContent = m.category || t("general");
     const description = document.createElement("p");
     description.className = "muted";
     description.textContent = m.description || "";
-
     const reward = document.createElement("p");
-    reward.innerHTML = "";
-    reward.textContent = "Reward: "+formatRupiah(m.reward_idr);
-
+    reward.textContent = t("rewardText")+": "+formatRupiah(m.reward_idr);
     const button = document.createElement("button");
-    button.textContent = "Kirim bukti";
+    button.textContent = t("sendProof");
     button.onclick = ()=>submitProof(m.id);
-
     item.append(title,category,description,reward,button);
     target.appendChild(item);
   });
 }
 
 async function submitProof(missionId){
-  const proof = prompt("Masukkan link bukti atau keterangan penyelesaian misi:");
+  const proof = prompt(t("proofPrompt"));
   if(!proof || !proof.trim()) return;
-
   const {error} = await db.from("submissions").insert({
-    mission_id:missionId,
-    member_id:currentUser.id,
-    proof_text:proof.trim(),
-    status:"pending"
+    mission_id:missionId,member_id:currentUser.id,
+    proof_text:proof.trim(),status:"pending"
   });
-
-  if(error){
-    alert("Pengajuan gagal: "+error.message);
-    return;
-  }
-
-  alert("Bukti berhasil dikirim dan menunggu pemeriksaan admin.");
+  if(error){alert(t("proofFailed")+": "+error.message);return;}
+  alert(t("proofSent"));
   await loadHistory();
 }
 
 async function loadHistory(){
   const target = document.getElementById("history");
-
-  const {data,error} = await db
-    .from("submissions")
+  target.dataset.loaded = "yes";
+  const {data,error} = await db.from("submissions")
     .select("status,proof_text,created_at,missions(title)")
-    .eq("member_id",currentUser.id)
-    .order("created_at",{ascending:false});
-
-  if(error){
-    target.textContent = "Gagal memuat riwayat: "+error.message;
-    return;
-  }
-
-  if(!data || !data.length){
-    target.textContent = "Belum ada pengajuan misi.";
-    return;
-  }
-
+    .eq("member_id",currentUser.id).order("created_at",{ascending:false});
+  if(error){target.textContent=error.message;return;}
+  if(!data || !data.length){target.textContent=t("noHistory");return;}
   target.innerHTML = "";
   data.forEach(s=>{
     const item = document.createElement("p");
-    item.textContent = (s.missions?.title || "Misi")+" — Status: "+s.status;
+    item.textContent = (s.missions?.title || t("unknownMission"))+
+      " — "+t("status")+": "+statusLabel(s.status);
     target.appendChild(item);
   });
 }
 
 async function loadWallet(){
   if(!currentUser) return;
-
   const dashboardBalance = document.getElementById("dashboardBalance");
   const walletBalance = document.getElementById("walletBalance");
   const target = document.getElementById("walletHistory");
+  dashboardBalance.textContent = t("loading");
+  walletBalance.textContent = t("loading");
+  target.textContent = t("loading");
 
-  dashboardBalance.textContent = "Memuat...";
-  walletBalance.textContent = "Memuat...";
-  target.textContent = "Memuat transaksi...";
-
-  const {data,error} = await db
-    .from("wallet_transactions")
+  const {data,error} = await db.from("wallet_transactions")
     .select("amount_idr,transaction_type,description,created_at")
-    .eq("member_id",currentUser.id)
-    .order("created_at",{ascending:false});
+    .eq("member_id",currentUser.id).order("created_at",{ascending:false});
 
   if(error){
     dashboardBalance.textContent = "Tidak tersedia";
     walletBalance.textContent = "Tidak tersedia";
-    target.textContent = "Gagal memuat wallet: "+error.message;
+    target.textContent = error.message;
     return;
   }
 
-  const balance = (data || []).reduce(
-    (total,t)=>total+Number(t.amount_idr || 0),0
-  );
-
+  const balance = (data || []).reduce((total,x)=>total+Number(x.amount_idr||0),0);
   dashboardBalance.textContent = formatRupiah(balance);
   walletBalance.textContent = formatRupiah(balance);
-
-  if(!data || !data.length){
-    target.textContent = "Belum ada transaksi wallet.";
-    return;
-  }
+  if(!data || !data.length){target.textContent=t("noTransactions");return;}
 
   target.innerHTML = "";
-  data.forEach(t=>{
+  data.forEach(x=>{
     const item = document.createElement("div");
     item.className = "transaction";
-
     const type = document.createElement("strong");
-    type.textContent = t.transaction_type || "Transaksi";
-
+    const typeMap = {reward:"rewardMission",withdrawal:"withdrawal",deposit:"deposit",adjustment:"adjustment"};
+    type.textContent = t(typeMap[x.transaction_type] || "adjustment");
     const desc = document.createElement("p");
     desc.className = "muted";
-    desc.textContent = t.description || "Tidak ada deskripsi";
-
+    desc.textContent = x.description || t("noDescription");
     const amount = document.createElement("p");
     amount.className = "transaction-amount";
-    amount.textContent = formatRupiah(t.amount_idr);
-
+    const numericAmount = Number(x.amount_idr || 0);
+    amount.textContent = (numericAmount >= 0 ? "+" : "")+formatRupiah(numericAmount);
     const date = document.createElement("p");
-    date.className = "muted";
-    date.textContent = new Date(t.created_at).toLocaleString("id-ID");
-
+    date.className = "transaction-date";
+    date.textContent = new Date(x.created_at).toLocaleString(currentLanguage==="id"?"id-ID":"en-US");
     item.append(type,desc,amount,date);
     target.appendChild(item);
   });
@@ -443,361 +571,202 @@ function openWallet(){
   document.getElementById("walletPage").classList.remove("hidden");
   loadWallet();
 }
-
 function closeWallet(){
   document.getElementById("walletPage").classList.add("hidden");
   document.getElementById("homePage").classList.remove("hidden");
 }
 
-/* PREVIEW GAMBAR */
 document.getElementById("missionImage").addEventListener("change",function(){
   const file = this.files[0];
   const preview = document.getElementById("imagePreview");
-
-  if(!file){
-    preview.classList.add("hidden");
-    preview.removeAttribute("src");
-    return;
-  }
-
+  if(!file){preview.classList.add("hidden");preview.removeAttribute("src");return;}
   if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
-    alert("Gunakan gambar JPG, PNG, atau WEBP.");
-    this.value = "";
-    preview.classList.add("hidden");
-    return;
+    alert(t("uploadFormat"));this.value="";preview.classList.add("hidden");return;
   }
-
-  if(file.size > 5 * 1024 * 1024){
-    alert("Ukuran gambar maksimal 5 MB.");
-    this.value = "";
-    preview.classList.add("hidden");
-    return;
+  if(file.size > 5*1024*1024){
+    alert(t("uploadSize"));this.value="";preview.classList.add("hidden");return;
   }
-
-  preview.src = URL.createObjectURL(file);
+  preview.src=URL.createObjectURL(file);
   preview.classList.remove("hidden");
 });
 
-/* UPLOAD GAMBAR KE SUPABASE STORAGE */
 async function uploadMissionImage(file){
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-  const path = currentUser.id+"/"+Date.now()+"-"+safeName;
-
-  const {error} = await db.storage
-    .from(BUCKET)
-    .upload(path,file,{contentType:file.type,upsert:false});
-
+  const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+  const path=currentUser.id+"/"+Date.now()+"-"+safeName;
+  const {error}=await db.storage.from(BUCKET).upload(path,file,{contentType:file.type,upsert:false});
   if(error) throw error;
-
-  const {data} = db.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-/* SIMPAN MISI BARU ATAU EDIT MISI */
 document.getElementById("missionForm").addEventListener("submit",async function(e){
   e.preventDefault();
+  if(!currentUser) return alert(t("loginAgain"));
+  const title=document.getElementById("missionTitle").value.trim();
+  const description=document.getElementById("missionDescription").value.trim();
+  const category=document.getElementById("missionCategory").value.trim();
+  const reward=Number(document.getElementById("missionReward").value);
+  const status=document.getElementById("missionStatus").value;
+  const file=document.getElementById("missionImage").files[0];
+  const saveButton=document.getElementById("saveMissionButton");
 
-  if(!currentUser) return alert("Silakan login kembali.");
-
-  const title = document.getElementById("missionTitle").value.trim();
-  const description = document.getElementById("missionDescription").value.trim();
-  const category = document.getElementById("missionCategory").value.trim();
-  const reward = Number(document.getElementById("missionReward").value);
-  const status = document.getElementById("missionStatus").value;
-  const file = document.getElementById("missionImage").files[0];
-  const saveButton = document.getElementById("saveMissionButton");
-
-  if(!title || !description || !Number.isSafeInteger(reward) || reward < 0){
-    alert("Periksa judul, deskripsi, dan nominal reward.");
-    return;
+  if(!title || !description || !Number.isSafeInteger(reward) || reward<0){
+    alert(t("checkMission"));return;
   }
+  saveButton.disabled=true;
+  saveButton.textContent=t("saving");
 
-  saveButton.disabled = true;
-  saveButton.textContent = "Menyimpan...";
-
+  const wasEditing=Boolean(editingMissionId);
   try{
-    let imageUrl = existingImageUrl;
-
+    let imageUrl=existingImageUrl;
     if(file){
-      if(!["image/jpeg","image/png","image/webp"].includes(file.type)){
-        throw new Error("Format gambar harus JPG, PNG, atau WEBP.");
-      }
-      if(file.size > 5*1024*1024){
-        throw new Error("Ukuran gambar maksimal 5 MB.");
-      }
-      imageUrl = await uploadMissionImage(file);
+      if(!["image/jpeg","image/png","image/webp"].includes(file.type)) throw new Error(t("uploadFormat"));
+      if(file.size>5*1024*1024) throw new Error(t("uploadSize"));
+      imageUrl=await uploadMissionImage(file);
     }
-
-    const missionData = {
-      title,
-      description,
-      category:category || "Umum",
-      reward_idr:reward,
-      status,
-      image_url:imageUrl
-    };
-
+    const missionData={title,description,category:category||t("general"),reward_idr:reward,status,image_url:imageUrl};
     let result;
-
     if(editingMissionId){
-      result = await db.from("missions")
-        .update(missionData)
-        .eq("id",editingMissionId);
+      result=await db.from("missions").update(missionData).eq("id",editingMissionId);
     }else{
-      result = await db.from("missions")
-        .insert({
-          ...missionData,
-          created_by:currentUser.id
-        });
+      result=await db.from("missions").insert({...missionData,created_by:currentUser.id});
     }
-
     if(result.error) throw result.error;
-
-    alert(editingMissionId ? "Misi berhasil diperbarui!" : "Misi berhasil diterbitkan!");
-
+    alert(wasEditing?t("missionUpdated"):t("missionSaved"));
     resetMissionForm();
     await loadAdminMissions();
     await loadMissions();
-
   }catch(error){
-    alert("Gagal menyimpan misi: "+error.message);
+    alert("Error: "+error.message);
   }finally{
-    saveButton.disabled = false;
-    saveButton.textContent = editingMissionId ? "Simpan Perubahan" : "Terbitkan Misi";
+    saveButton.disabled=false;
+    saveButton.textContent=t("publishMission");
   }
 });
 
 function resetMissionForm(){
-  editingMissionId = null;
-  existingImageUrl = null;
-
+  editingMissionId=null;
+  existingImageUrl=null;
   document.getElementById("missionForm").reset();
-  document.getElementById("missionFormTitle").textContent = "+ Tambah Misi Baru";
-  document.getElementById("saveMissionButton").textContent = "Terbitkan Misi";
+  document.getElementById("missionFormTitle").textContent=t("addMission");
+  document.getElementById("saveMissionButton").textContent=t("publishMission");
   document.getElementById("cancelEditButton").classList.add("hidden");
   document.getElementById("imagePreview").classList.add("hidden");
   document.getElementById("imagePreview").removeAttribute("src");
 }
 
 function editMission(m){
-  editingMissionId = m.id;
-  existingImageUrl = m.image_url || null;
-
-  document.getElementById("missionTitle").value = m.title || "";
-  document.getElementById("missionDescription").value = m.description || "";
-  document.getElementById("missionCategory").value = m.category || "";
-  document.getElementById("missionReward").value = m.reward_idr ?? 0;
-  document.getElementById("missionStatus").value = m.status || "active";
-  document.getElementById("missionImage").value = "";
-
-  const preview = document.getElementById("imagePreview");
-  if(existingImageUrl){
-    preview.src = existingImageUrl;
-    preview.classList.remove("hidden");
-  }else{
-    preview.classList.add("hidden");
-  }
-
-  document.getElementById("missionFormTitle").textContent = "Edit Misi";
-  document.getElementById("saveMissionButton").textContent = "Simpan Perubahan";
+  editingMissionId=m.id;
+  existingImageUrl=m.image_url||null;
+  document.getElementById("missionTitle").value=m.title||"";
+  document.getElementById("missionDescription").value=m.description||"";
+  document.getElementById("missionCategory").value=m.category||"";
+  document.getElementById("missionReward").value=m.reward_idr??0;
+  document.getElementById("missionStatus").value=m.status||"active";
+  document.getElementById("missionImage").value="";
+  const preview=document.getElementById("imagePreview");
+  if(existingImageUrl){preview.src=existingImageUrl;preview.classList.remove("hidden");}
+  else preview.classList.add("hidden");
+  document.getElementById("missionFormTitle").textContent=t("editMission");
+  document.getElementById("saveMissionButton").textContent=t("saveChanges");
   document.getElementById("cancelEditButton").classList.remove("hidden");
-
   document.getElementById("missionFormCard").scrollIntoView({behavior:"smooth"});
 }
 
 async function deleteMission(id){
-  if(!confirm("Yakin ingin menghapus misi ini?")) return;
-
-  const {error} = await db.from("missions").delete().eq("id",id);
-
-  if(error){
-    alert("Gagal menghapus misi: "+error.message);
-    return;
-  }
-
-  alert("Misi berhasil dihapus.");
+  if(!confirm(t("deleteConfirm"))) return;
+  const {error}=await db.from("missions").delete().eq("id",id);
+  if(error){alert(error.message);return;}
+  alert(t("missionDeleted"));
   await loadAdminMissions();
   await loadMissions();
 }
 
 async function loadAdminMissions(){
-  const target = document.getElementById("adminMissions");
-  target.textContent = "Memuat daftar misi...";
-
-  const {data,error} = await db
-    .from("missions")
+  const target=document.getElementById("adminMissions");
+  target.dataset.loaded="yes";
+  target.textContent=t("loading");
+  const {data,error}=await db.from("missions")
     .select("id,title,description,category,reward_idr,status,image_url,created_at")
     .order("created_at",{ascending:false});
-
-  if(error){
-    target.textContent = "Gagal memuat daftar misi: "+error.message;
-    return;
-  }
-
-  if(!data || !data.length){
-    target.textContent = "Belum ada misi. Gunakan formulir di atas untuk membuat misi pertama.";
-    return;
-  }
-
-  target.innerHTML = "";
-
+  if(error){target.textContent=error.message;return;}
+  if(!data || !data.length){target.textContent=t("noAdminMissions");return;}
+  target.innerHTML="";
   data.forEach(m=>{
-    const item = document.createElement("div");
-    item.className = "admin-mission";
-
+    const item=document.createElement("div");
+    item.className="admin-mission";
     if(m.image_url){
-      const img = document.createElement("img");
-      img.src = m.image_url;
-      img.alt = m.title || "Gambar misi";
-      img.className = "mission-image";
+      const img=document.createElement("img");
+      img.src=m.image_url;img.alt=m.title||"Mission image";img.className="mission-image";
       item.appendChild(img);
     }
-
-    const title = document.createElement("strong");
-    title.textContent = m.title;
-
-    const reward = document.createElement("p");
-    reward.textContent = "Reward: "+formatRupiah(m.reward_idr);
-
-    const category = document.createElement("p");
-    category.className = "muted";
-    category.textContent = "Kategori: "+(m.category || "Umum");
-
-    const status = document.createElement("span");
-    status.className = "status "+(m.status === "active" ? "active" : "paused");
-    status.textContent = m.status === "active" ? "Aktif" : "Nonaktif";
-
-    const actions = document.createElement("div");
-    actions.className = "admin-actions";
-
-    const edit = document.createElement("button");
-    edit.textContent = "Edit";
-    edit.className = "secondary";
-    edit.onclick = ()=>editMission(m);
-
-    const remove = document.createElement("button");
-    remove.textContent = "Hapus";
-    remove.className = "reject";
-    remove.onclick = ()=>deleteMission(m.id);
-
-    actions.append(edit,remove);
-    item.append(title,reward,category,status,actions);
-    target.appendChild(item);
+    const title=document.createElement("strong");title.textContent=m.title;
+    const reward=document.createElement("p");reward.textContent=t("rewardText")+": "+formatRupiah(m.reward_idr);
+    const category=document.createElement("p");category.className="muted";
+    category.textContent=t("categoryText")+": "+(m.category||t("general"));
+    const status=document.createElement("span");
+    status.className="status "+(m.status==="active"?"active":"paused");
+    status.textContent=t(m.status==="active"?"active":"paused");
+    const actions=document.createElement("div");actions.className="admin-actions";
+    const edit=document.createElement("button");edit.textContent=t("edit");edit.className="secondary";edit.onclick=()=>editMission(m);
+    const remove=document.createElement("button");remove.textContent=t("delete");remove.className="reject";remove.onclick=()=>deleteMission(m.id);
+    actions.append(edit,remove);item.append(title,reward,category,status,actions);target.appendChild(item);
   });
 }
 
-/* PANEL PENGAJUAN ADMIN */
 async function loadAdminSubmissions(){
-  const target = document.getElementById("adminSubmissions");
-
-  const {data,error} = await db
-    .from("submissions")
-    .select("id,proof_text,status,created_at,missions(title)")
+  const target=document.getElementById("adminSubmissions");
+  target.dataset.loaded="yes";
+  target.textContent=t("loading");
+  const {data,error}=await db.from("submissions")
+    .select("id,member_id,proof_text,status,created_at,missions(title)")
     .order("created_at",{ascending:false});
-
-  if(error){
-    target.textContent = "Gagal memuat pengajuan: "+error.message;
-    return;
-  }
-
-  if(!data || !data.length){
-    target.textContent = "Belum ada pengajuan anggota.";
-    return;
-  }
-
-  target.innerHTML = "";
-
+  if(error){target.textContent=error.message;return;}
+  if(!data || !data.length){target.textContent=t("noSubmissions");return;}
+  target.innerHTML="";
   data.forEach(s=>{
-    const item = document.createElement("div");
-    item.className = "mission";
-
-    const info = document.createElement("p");
-    info.textContent =
-      (s.missions?.title || "Misi")+
-      " — Status: "+s.status+
-      " — Bukti: "+(s.proof_text || "");
-
+    const item=document.createElement("div");item.className="mission";
+    const info=document.createElement("p");
+    info.textContent=(s.missions?.title||t("unknownMission"))+
+      " — "+t("status")+": "+statusLabel(s.status)+
+      " — Member: "+s.member_id+
+      " — Proof: "+(s.proof_text||"");
     item.appendChild(info);
 
-    if(s.status === "pending"){
-      const actions = document.createElement("div");
-      actions.className = "admin-actions";
-
-      const approve = document.createElement("button");
-      approve.textContent = "Approve";
-
-      approve.onclick = async()=>{
-        if(!confirm("Setujui pengajuan ini dan catat reward ke wallet anggota?")) return;
-
-        approve.disabled = true;
-
-        const {error} = await db.rpc("approve_submission_with_reward",{
-          p_submission_id:s.id
-        });
-
-        if(error){
-          alert("Gagal menyetujui dan mencatat reward: "+error.message);
-          approve.disabled = false;
-          return;
-        }
-
-        alert("Pengajuan disetujui dan reward berhasil dicatat!");
+    if(s.status==="pending"){
+      const actions=document.createElement("div");actions.className="admin-actions";
+      const approve=document.createElement("button");approve.textContent=t("approve");
+      approve.onclick=async()=>{
+        if(!confirm(t("approveConfirm"))) return;
+        approve.disabled=true;
+        const {error}=await db.rpc("approve_submission_with_reward",{p_submission_id:s.id});
+        if(error){alert(error.message);approve.disabled=false;return;}
+        alert(t("approvedMessage"));
         await loadAdminSubmissions();
       };
-
-      const reject = document.createElement("button");
-      reject.textContent = "Reject";
-      reject.className = "reject";
-
-      reject.onclick = async()=>{
-        const note = prompt("Masukkan alasan penolakan:");
-        if(!note || !note.trim()) return;
-
-        reject.disabled = true;
-
-        const {data:updated,error} = await db
-          .from("submissions")
-          .update({
-            status:"rejected",
-            review_note:note.trim(),
-            reviewed_by:currentUser.id,
-            reviewed_at:new Date().toISOString()
-          })
-          .eq("id",s.id)
-          .eq("status","pending")
-          .select("id")
-          .maybeSingle();
-
-        if(error){
-          alert("Gagal menolak: "+error.message);
-          reject.disabled = false;
-          return;
-        }
-
-        if(!updated){
-          alert("Pengajuan sudah berubah atau tidak dapat diperbarui.");
-          await loadAdminSubmissions();
-          return;
-        }
-
-        alert("Pengajuan berhasil ditolak!");
+      const reject=document.createElement("button");reject.textContent=t("reject");reject.className="reject";
+      reject.onclick=async()=>{
+        const note=prompt(t("rejectPrompt"));
+        if(!note||!note.trim()) return;
+        reject.disabled=true;
+        const {data:updated,error}=await db.from("submissions")
+          .update({status:"rejected",review_note:note.trim(),reviewed_by:currentUser.id,reviewed_at:new Date().toISOString()})
+          .eq("id",s.id).eq("status","pending").select("id").maybeSingle();
+        if(error){alert(error.message);reject.disabled=false;return;}
+        if(!updated){alert("Submission could not be updated.");await loadAdminSubmissions();return;}
+        alert(t("rejectedMessage"));
         await loadAdminSubmissions();
       };
-
-      actions.append(approve,reject);
-      item.appendChild(actions);
+      actions.append(approve,reject);item.appendChild(actions);
     }
-
     target.appendChild(item);
   });
 }
 
 db.auth.onAuthStateChange((event,session)=>{
-  if(session?.user){
-    setTimeout(loadApp,0);
-  }
+  if(session?.user) setTimeout(loadApp,0);
 });
 
+applyLanguage();
 loadApp();
 </script>
 </body>
