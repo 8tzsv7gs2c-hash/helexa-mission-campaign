@@ -274,7 +274,9 @@ async function loadAdminSubmissions() {
       " — Bukti: " + (s.proof_text || "");
 
     item.appendChild(info);
-
+const test = document.createElement("p");
+test.textContent = "TES TOMBOL BERHASIL";
+item.appendChild(test);
     if (s.status === "pending") {
       const approve = document.createElement("button");
       approve.textContent = "Approve";
